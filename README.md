@@ -11,7 +11,7 @@ with an AI copilot alongside it.
 
 <!-- TODO: add a demo GIF/screenshot here — it's the highest-impact thing on this page.
      Record a ~15s clip of: ask a price → forecast+chart → a 10-K question → a trade approval.
-     Drop it in docs/ and reference it as ![demo](docs/demo.gif) -->
+     Drop it at the repo root and reference it as ![demo](demo.gif) -->
 
 ---
 
@@ -102,12 +102,11 @@ The full write-ups (cost tiering, per-user scoping, human-in-the-loop) live in t
 │   ├── stock_agent/      orchestrator, agents, tools, guardrails, auth, RAG
 │   └── eval/             regression-gated eval harness
 ├── arch/         ← architecture blueprint (orchestration, MCP, RAG, guardrails, …)
-├── prd/          ← product requirements + epic/story breakdown
-└── docs/         ← tech stack, privacy, accuracy targets, model card, UX notes
+└── prd/          ← product requirements + epic/story breakdown
 ```
 
-This repo deliberately keeps the **design docs alongside the code**. `arch/`, `prd/`, and
-`docs/` are the blueprint the implementation was built from; the app implements a
+This repo deliberately keeps the **design docs alongside the code**. `arch/` and `prd/`
+are the blueprint the implementation was built from; the app implements a
 scoped-down v1 of that plan, with the larger surface documented as a roadmap.
 
 ---

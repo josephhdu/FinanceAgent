@@ -185,7 +185,7 @@ python eval/run_eval.py --limit 8  # cheap partial run
 ```
 
 Thresholds live in [eval/thresholds.yaml](eval/thresholds.yaml) (intent ≥ 0.80,
-routing = 1.00, per `docs/accuracy.md`).
+routing = 1.00).
 
 ---
 
