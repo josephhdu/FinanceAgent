@@ -1,0 +1,20 @@
+# Secrets & env
+.env
+stock_agent/prompts/.env
+
+# Data & generated artifacts
+data/
+*.db
+*.jsonl
+audit.log
+lightrag_storage/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+
+# OS
+.DS_Store

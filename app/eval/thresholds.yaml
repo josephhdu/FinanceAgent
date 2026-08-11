@@ -1,0 +1,4 @@
+# Regression gates for `run_eval.py --gate`. A metric below its threshold fails
+# the gate (non-zero exit). Values per docs/accuracy.md.
+intent_accuracy: 0.80   # fraction of INTENT_CASES classified correctly
+route_accuracy: 1.00    # routing table is deterministic — must be exact

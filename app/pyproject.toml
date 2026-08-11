@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "financeai"
+version = "0.1.0"
+description = "Stock analysis multi-agent system (Google ADK + Gemini)"
+requires-python = ">=3.10"
+# Runtime deps are tracked in requirements.txt for now; kept empty here so an
+# editable install doesn't try to re-resolve the heavy ML stack.
+dependencies = []
+
+# Only `stock_agent` is an importable package. web_server.py, main.py, and the
+# scripts/ files are top-level modules run directly, not part of the package.
+[tool.setuptools]
+packages = ["stock_agent"]

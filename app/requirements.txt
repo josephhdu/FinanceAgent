@@ -1,0 +1,38 @@
+# FinanceAI v1 — dependency subset (see plan). Versions left unpinned/compatible
+# for Python 3.10+. The blueprint's fictional pins (e.g. yfinance>=1.3.0) are
+# intentionally dropped in favor of the real packages.
+
+# --- Web layer (Chunk 0-2) ---
+fastapi
+uvicorn[standard]
+pydantic
+python-dotenv
+PyYAML
+
+# --- Auth (Chunk 2) ---
+PyJWT
+bcrypt   # used directly (avoids the passlib/bcrypt 4.x version-compat breakage)
+
+# --- Persistent sessions (Chunk 8) ---
+aiosqlite   # backs ADK's SqliteSessionService (also pulled in by google-adk)
+
+# --- Agent + AI layer (Chunk 1) ---
+google-adk
+google-genai
+fastmcp
+mcp
+
+# --- Finance data (Chunk 1, 3, 5) ---
+yfinance
+pandas
+numpy
+
+# --- Charts (Chunk 3) ---
+matplotlib
+
+# --- RAG (Chunk 4) ---
+chromadb
+sentence-transformers
+
+# Deferred to later versions (NOT installed in v1):
+#   lightrag-hku raganything reportlab cryptography ragas langfuse a2a-sdk
