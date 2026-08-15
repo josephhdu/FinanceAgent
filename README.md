@@ -1,5 +1,9 @@
 # FinanceAI — a multi-agent stock-analysis platform
 
+[![CI](https://github.com/josephhdu/FinanceAgent/actions/workflows/ci.yml/badge.svg)](https://github.com/josephhdu/FinanceAgent/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+![Python](https://img.shields.io/badge/python-3.11%2B-blue)
+
 A web trading-desk UI backed by a **deterministic multi-agent system** built on
 Google's Agent Development Kit (ADK) and Gemini. Ask natural-language questions and
 get streamed answers with live prices, linear-regression forecasts, inline charts,

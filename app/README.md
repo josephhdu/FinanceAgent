@@ -189,6 +189,24 @@ routing = 1.00).
 
 ---
 
+## Tests
+
+A fast unit suite (no model calls, no network) covers the pure logic — the
+deterministic routing table, guardrail regexes, average-cost portfolio accounting,
+and the oversell guard. It runs on every push via GitHub Actions.
+
+```bash
+cd app
+pip install pytest
+pytest                 # ~2s, 21 tests
+python main.py --check # build the agent graph + print the routing table (smoke test)
+```
+
+The RAG warm-up is skipped under `FINANCEAI_DISABLE_WARMUP=1` (set automatically in
+tests), so the suite never pulls in the ML stack.
+
+---
+
 ## Observability & safety
 
 - **Audit log** — every agent/tool/model event is one JSON line in `audit.log`, with

@@ -8,6 +8,7 @@ logged-in user can use every feature — RBAC is a documented future extension).
 from __future__ import annotations
 
 import os
+import secrets
 import sqlite3
 import time
 from datetime import datetime, timezone
@@ -93,8 +94,21 @@ def seed_default_user() -> None:
 
 # --- JWT sessions ---------------------------------------------------------
 
+# Resolve the signing secret once. If JWT_SECRET is unset we fall back to a
+# random per-process secret (NOT a shared hardcoded default): tokens simply won't
+# survive a restart, which is safe — far better than every deployment signing with
+# the same well-known string, which would let anyone forge sessions.
+_ENV_SECRET = os.getenv("JWT_SECRET") or ""
+if not _ENV_SECRET:
+    _ENV_SECRET = secrets.token_hex(32)
+    print(
+        "[auth] WARNING: JWT_SECRET is not set — using a random per-process secret. "
+        "Sessions will be invalidated on restart. Set JWT_SECRET in .env for production."
+    )
+
+
 def _secret() -> str:
-    return os.getenv("JWT_SECRET", "dev-insecure-secret")
+    return _ENV_SECRET
 
 
 def make_token(username: str, role: str = "user") -> str:

@@ -43,8 +43,11 @@ def _init_rag() -> None:
         _init_done.set()
 
 
-# Warm the embedding model up in the background during startup.
-threading.Thread(target=_init_rag, daemon=True).start()
+# Warm the embedding model up in the background during startup. Skipped when
+# FINANCEAI_DISABLE_WARMUP=1 (tests/CI), so importing the agent graph never pulls
+# in the heavy chromadb/sentence-transformers stack or downloads the model.
+if os.getenv("FINANCEAI_DISABLE_WARMUP") != "1":
+    threading.Thread(target=_init_rag, daemon=True).start()
 
 
 def get_collection():

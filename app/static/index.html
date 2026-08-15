@@ -6,6 +6,7 @@
   <title>FinanceAI</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ctext y='14' font-size='14'%3E%F0%9F%93%88%3C/text%3E%3C/svg%3E" />
   <script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
   <style>
     :root{
       color-scheme: dark;
@@ -458,6 +459,9 @@
     let sessionId = localStorage.getItem("financeai_sid") || newId();
     localStorage.setItem("financeai_sid", sessionId);
     const esc = s => (s||"").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+    // Render untrusted markdown (model replies) safely: parse, then sanitize the
+    // resulting HTML so a reply can never inject <script>/onerror/etc.
+    const mdSafe = md => DOMPurify.sanitize(marked.parse(md || ""));
     let sel = "AMD", tf = "1M", forecast = true;
     let series = {points:[], forecast:[]};
 
@@ -780,7 +784,7 @@
           sig=`<div class="sigmini"><span class="pill ${signal.action}">${signal.action}</span>
             <span class="num" style="color:var(--soft)">${signal.ticker} · ${c}%</span></div>`; }
         const imgs=images.map(md=>marked.parse(md)).join("");
-        const body = answer? marked.parse(answer) : ((imgs||sig)?"":`<span class="prog">${prog||"…"}</span>`);
+        const body = answer? mdSafe(answer) : ((imgs||sig)?"":`<span class="prog">${prog||"…"}</span>`);
         let src="";
         if(sources.length){ src=`<details class="sources"><summary>📎 Sources (${sources.length})</summary><ul>`+
           sources.map(s=>`<li><b>${s.label}</b> — ${s.detail}</li>`).join("")+`</ul></details>`; }
@@ -846,7 +850,7 @@
       let d; try{ d=await api("/api/sessions/"+sessionId+"/messages"); }catch(e){ return; }
       for(const m of (d.messages||[])){
         if(m.role==="user") addMsg("user").textContent=m.text;
-        else { const el=addMsg("ai"); el.innerHTML=marked.parse(m.text); addFeedback(el, m.text); }
+        else { const el=addMsg("ai"); el.innerHTML=mdSafe(m.text); addFeedback(el, m.text); }
       }
     }
     function newChat(){ sessionId=newId(); localStorage.setItem("financeai_sid",sessionId);

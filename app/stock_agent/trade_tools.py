@@ -231,23 +231,40 @@ def _read_trades() -> list[dict]:
     return out
 
 
-def get_portfolio() -> dict:
-    """Compute current paper positions by replaying the trade log."""
+def replay_positions(trades: list[dict]) -> list[dict]:
+    """Replay a trade log into open positions using **average-cost accounting**.
+
+    A SELL reduces cost basis by the *average cost* of the shares sold — NOT their
+    sale price — so the shares that remain keep a correct basis (and therefore a
+    correct unrealized P/L). Reducing basis by the sale notional instead would let
+    a profitable partial sale zero out the basis of the shares still held and
+    invent phantom gains. Selling a position down to zero clears its basis exactly.
+
+    Pure function (no I/O) so the accounting is unit-testable in isolation.
+    """
     positions: dict[str, dict] = {}
-    for t in _read_trades():
+    for t in trades:
         pos = positions.setdefault(t["ticker"], {"shares": 0, "cost_basis": 0.0})
         if t["action"] == "BUY":
             pos["shares"] += t["shares"]
             pos["cost_basis"] += t["notional"]
         elif t["action"] == "SELL":
+            avg_cost = pos["cost_basis"] / pos["shares"] if pos["shares"] else 0.0
             pos["shares"] -= t["shares"]
-            pos["cost_basis"] -= t["notional"]
-    holdings = [
+            pos["cost_basis"] -= avg_cost * t["shares"]
+            if pos["shares"] <= 0:  # fully closed (oversell is guarded upstream)
+                pos["shares"] = 0
+                pos["cost_basis"] = 0.0
+    return [
         {"ticker": k, "shares": v["shares"], "cost_basis": round(v["cost_basis"], 2)}
         for k, v in positions.items()
         if v["shares"] != 0
     ]
-    return {"status": "success", "positions": holdings}
+
+
+def get_portfolio() -> dict:
+    """Compute this user's current paper positions by replaying their trade log."""
+    return {"status": "success", "positions": replay_positions(_read_trades())}
 
 
 def get_trade_history(limit: int = 10) -> dict:

@@ -15,3 +15,10 @@ dependencies = []
 # scripts/ files are top-level modules run directly, not part of the package.
 [tool.setuptools]
 packages = ["stock_agent"]
+
+[tool.pytest.ini_options]
+# Run from app/. `pythonpath = "."` makes `stock_agent` and `eval` importable
+# without an install step.
+pythonpath = ["."]
+testpaths = ["tests"]
+addopts = "-q"
