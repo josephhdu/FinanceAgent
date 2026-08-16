@@ -110,11 +110,15 @@ These are the parts worth reading the code for.
 
 ## Tech stack
 
-Python 3.11+ · **Google ADK** + **google-genai** (Gemini) · **FastMCP** (finance tools
-over MCP/stdio) · **FastAPI** + **uvicorn** (SSE streaming) · **ChromaDB** +
-**sentence-transformers** (`all-MiniLM-L6-v2`) for RAG · **yfinance** / pandas /
-matplotlib · **PyJWT** + **bcrypt** (auth) · **aiosqlite** (persistent sessions) ·
-vanilla JS + SVG frontend (no build step).
+**Backend** — Python 3.11+ · **Google ADK** + **google-genai** (Gemini) · **FastMCP**
+(finance tools over MCP/stdio) · **FastAPI** + **uvicorn** (SSE streaming) · **ChromaDB**
++ **sentence-transformers** (`all-MiniLM-L6-v2`) for RAG · **yfinance** / pandas /
+matplotlib · **PyJWT** + **bcrypt** (auth) · **aiosqlite** (persistent sessions).
+
+**Frontend** — **React 18** + **TypeScript** + **Vite** SPA · **TradingView
+lightweight-charts** (price + forecast) · **marked** + **DOMPurify** (safe markdown) ·
+plain CSS (no framework). Talks to the backend over the REST + SSE endpoints; built to
+`frontend/dist/` and served by FastAPI (same origin in production).
 
 ---
 
@@ -123,7 +127,11 @@ vanilla JS + SVG frontend (no build step).
 ```
 app/
   web_server.py            # FastAPI: SSE chat + REST (quotes, history, portfolio, trade, sessions, metrics)
-  static/index.html        # dashboard UI (watchlist, charts, portfolio, trade ticket, AI copilot)
+  frontend/                # React + TypeScript + Vite SPA
+    src/
+      components/          # TopBar, Watchlist, MarketsPage, PriceChart, TradeTicket, Copilot, …
+      api/                 # typed response models + auth-aware fetch hook
+      auth/ lib/           # auth context; format + safe-markdown helpers
   stock_agent/
     agent.py               # GraphOrchestrator, _ROUTE_MAP, injection/disclaimer guardrails
     intent_agent.py        # history-free JSON intent classifier
@@ -161,8 +169,16 @@ cp .env.example .env    # then edit:
 # (optional) build the 10-K RAG index — a few tickers to start
 python scripts/download_10ks.py MSFT NVDA SNOW
 
+# build the React frontend (FastAPI serves the compiled bundle from frontend/dist/)
+cd frontend && npm install && npm run build && cd ..
+
 uvicorn web_server:app --port 8080 --reload
 ```
+
+> **Developing the UI?** Run `npm run dev` in `frontend/` for a hot-reloading Vite
+> dev server on <http://localhost:5173> that proxies `/api` to the backend on :8000
+> (`uvicorn web_server:app --port 8000`). The `npm run build` step above is only
+> needed for the single-origin production serving.
 
 Open <http://localhost:8080>, sign in, and try:
 

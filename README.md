@@ -102,8 +102,9 @@ The full write-ups (cost tiering, per-user scoping, human-in-the-loop) live in t
 ├── app/          ← the application (start here)
 │   ├── README.md         full setup, run, eval, and design-decision write-ups
 │   ├── web_server.py     FastAPI: SSE chat + REST (quotes, portfolio, trade, sessions)
-│   ├── static/           dashboard UI (vanilla JS + SVG, no build step)
+│   ├── frontend/         React + TypeScript + Vite SPA (dashboard, charts, copilot)
 │   ├── stock_agent/      orchestrator, agents, tools, guardrails, auth, RAG
+│   ├── tests/            pytest unit suite
 │   └── eval/             regression-gated eval harness
 ├── arch/         ← architecture blueprint (orchestration, MCP, RAG, guardrails, …)
 └── prd/          ← product requirements + epic/story breakdown
@@ -122,8 +123,15 @@ cd app
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env          # then add your GOOGLE_API_KEY + a JWT_SECRET
+
+# build the React frontend (FastAPI serves the compiled bundle)
+cd frontend && npm install && npm run build && cd ..
+
 uvicorn web_server:app --port 8080 --reload
 ```
+
+> During UI development, run `npm run dev` in `frontend/` instead — the Vite dev
+> server hot-reloads on :5173 and proxies `/api` to the backend on :8000.
 
 Open <http://localhost:8080>, sign in, and try *"What's MSFT trading at?"*,
 *"Forecast NVDA with a chart"*, *"What are Snowflake's risk factors?"*, or

@@ -19,6 +19,12 @@ venv/
 *.egg-info/
 .pytest_cache/
 
+# === Node / frontend build ===
+node_modules/
+**/node_modules/
+app/frontend/dist/
+*.tsbuildinfo
+
 # === OS / editor ===
 .DS_Store
 .vscode/

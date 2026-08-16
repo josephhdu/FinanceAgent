@@ -45,13 +45,19 @@ DEFAULT_WATCHLIST = ["AMD", "MSFT", "NVDA", "SNOW", "AAPL", "META"]
 STARTING_CASH = 10_000.0
 
 _HERE = os.path.dirname(__file__)
-_STATIC_DIR = os.path.join(_HERE, "static")
+_FRONTEND_DIST = os.path.join(_HERE, "frontend", "dist")
+_ASSETS_DIR = os.path.join(_FRONTEND_DIST, "assets")
 _DATA_DIR = os.path.join(_HERE, "data")
 
 APP_NAME = "financeai"
 
-app = FastAPI(title="FinanceAI", version="0.4.0")
-app.mount("/static", StaticFiles(directory=_STATIC_DIR), name="static")
+app = FastAPI(title="FinanceAI", version="1.0.0")
+# Serve the built React SPA. Vite emits hashed JS/CSS under dist/assets/, which the
+# generated index.html references at /assets/*. The mount is conditional so the API
+# still boots when the frontend hasn't been built yet (in dev you run the Vite dev
+# server for the UI and it proxies /api here).
+if os.path.isdir(_ASSETS_DIR):
+    app.mount("/assets", StaticFiles(directory=_ASSETS_DIR), name="assets")
 
 # Persistent sessions: the agent's working memory (events + state) survives a
 # restart, so a continued conversation keeps its context (Chunk 8).
@@ -185,8 +191,15 @@ def feedback(body: FeedbackIn, user: dict = Depends(_require_auth)) -> JSONRespo
 
 
 @app.get("/")
-def index() -> FileResponse:
-    return FileResponse(os.path.join(_STATIC_DIR, "index.html"))
+def index():
+    """Serve the built SPA, or a helpful 503 if it hasn't been built yet."""
+    idx = os.path.join(_FRONTEND_DIST, "index.html")
+    if not os.path.exists(idx):
+        return JSONResponse(
+            {"detail": "Frontend not built. Run: cd frontend && npm install && npm run build"},
+            status_code=503,
+        )
+    return FileResponse(idx)
 
 
 @app.post("/api/login")
