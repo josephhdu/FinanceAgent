@@ -50,26 +50,26 @@ export function PriceChart({ sel }: { sel: string }) {
       autoSize: true,
       layout: {
         background: { color: "transparent" },
-        textColor: "#6b7480",
+        textColor: "#5f7797",
         fontFamily: "ui-monospace, monospace",
       },
-      grid: { vertLines: { visible: false }, horzLines: { color: "#1f2530" } },
-      rightPriceScale: { borderColor: "#262d38" },
-      timeScale: { borderColor: "#262d38", timeVisible: false },
+      grid: { vertLines: { visible: false }, horzLines: { color: "#16283f" } },
+      rightPriceScale: { borderColor: "#20364f" },
+      timeScale: { borderColor: "#20364f", timeVisible: false },
       crosshair: {
-        vertLine: { color: "#3a4453", width: 1, style: LineStyle.Solid, labelBackgroundColor: "#1c2431" },
-        horzLine: { color: "#3a4453", labelBackgroundColor: "#1c2431" },
+        vertLine: { color: "#3a5170", width: 1, style: LineStyle.Solid, labelBackgroundColor: "#13203a" },
+        horzLine: { color: "#3a5170", labelBackgroundColor: "#13203a" },
       },
     });
     areaRef.current = chart.addAreaSeries({
-      lineColor: "#f0a93d",
-      topColor: "rgba(240,169,61,0.28)",
-      bottomColor: "rgba(240,169,61,0)",
+      lineColor: "#3ce7f5",
+      topColor: "rgba(60,231,245,0.26)",
+      bottomColor: "rgba(60,231,245,0)",
       lineWidth: 2,
       priceLineVisible: false,
     });
     fcRef.current = chart.addLineSeries({
-      color: "#56beb8",
+      color: "#4d8dff",
       lineWidth: 2,
       lineStyle: LineStyle.Dashed,
       priceLineVisible: false,
@@ -152,10 +152,10 @@ export function PriceChart({ sel }: { sel: string }) {
       </div>
       <div className="chart-legend">
         <span>
-          <i className="sw amber" /> price history
+          <i className="sw cyan" /> price history
         </span>
         <span>
-          <i className="sw teal dash" /> 14-day OLS forecast
+          <i className="sw blue dash" /> 14-day OLS forecast
         </span>
       </div>
     </section>
