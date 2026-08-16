@@ -52,6 +52,9 @@ export function PriceChart({ sel }: { sel: string }) {
         background: { color: "transparent" },
         textColor: "#5f7797",
         fontFamily: "ui-monospace, monospace",
+        // Hide the floating on-chart TradingView logo; attribution is kept as a
+        // discreet credit under the legend instead (see below) per their terms.
+        attributionLogo: false,
       },
       grid: { vertLines: { visible: false }, horzLines: { color: "#16283f" } },
       rightPriceScale: { borderColor: "#20364f" },
@@ -157,6 +160,14 @@ export function PriceChart({ sel }: { sel: string }) {
         <span>
           <i className="sw blue dash" /> 14-day OLS forecast
         </span>
+        <a
+          className="attr"
+          href="https://www.tradingview.com"
+          target="_blank"
+          rel="noreferrer noopener"
+        >
+          Charts by TradingView
+        </a>
       </div>
     </section>
   );

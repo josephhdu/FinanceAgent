@@ -15,8 +15,8 @@
 *{box-sizing:border-box}
 html,body,#root{margin:0;height:100%}
 body{background:
-  radial-gradient(1100px 520px at 12% -8%, rgba(255,46,67,.12), transparent 58%),
-  radial-gradient(1000px 620px at 100% 118%, rgba(255,46,67,.08), transparent 55%),
+  radial-gradient(1250px 600px at 12% -8%, rgba(255,46,67,.20), transparent 60%),
+  radial-gradient(1150px 700px at 100% 118%, rgba(255,46,67,.14), transparent 58%),
   var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;-webkit-font-smoothing:antialiased}
 .num{font-family:var(--mono);font-variant-numeric:tabular-nums}
 button{font-family:inherit;cursor:pointer}
@@ -111,7 +111,9 @@ input{font-family:inherit}
 .chart-wrap{position:relative;height:330px}
 .lwchart{width:100%;height:100%}
 .chart-msg{position:absolute;inset:0;display:grid;place-items:center;color:var(--muted);font-size:.82rem;pointer-events:none}
-.chart-legend{display:flex;gap:1.2rem;margin-top:.6rem;font-size:.72rem;color:var(--soft)}
+.chart-legend{display:flex;align-items:center;gap:1.2rem;margin-top:.6rem;font-size:.72rem;color:var(--soft)}
+.chart-legend .attr{margin-left:auto;color:var(--muted);text-decoration:none;font-size:.66rem}
+.chart-legend .attr:hover{color:var(--soft)}
 .sw{display:inline-block;width:14px;height:3px;vertical-align:middle;margin-right:.35rem;border-radius:2px}
 .sw.cyan{background:var(--cyan)} .sw.blue{background:var(--blue)}
 .sw.dash{background:repeating-linear-gradient(90deg,var(--blue) 0 4px,transparent 4px 7px)}
