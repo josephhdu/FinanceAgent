@@ -1,9 +1,10 @@
 """FastAPI web server for FinanceAI.
 
-Chunk 1: wraps the ADK runner in an SSE chat endpoint. A browser POST to
+Wraps the ADK runner in an SSE chat endpoint: a browser POST to
 /api/chat/{session_id} streams the orchestrator's output back token-by-token as
-Server-Sent Events. Auth (Chunk 2), inline charts (Chunk 3), citations (Chunk 4),
-and the trade badge (Chunk 5) extend the same stream.
+Server-Sent Events, including inline charts, 10-K citations, and trade badges.
+Also serves the REST API (auth, quotes, history, portfolio, trades, sessions)
+and the built React SPA.
 
 Run: uvicorn web_server:app --port 8080 --reload
 """
@@ -60,7 +61,7 @@ if os.path.isdir(_ASSETS_DIR):
     app.mount("/assets", StaticFiles(directory=_ASSETS_DIR), name="assets")
 
 # Persistent sessions: the agent's working memory (events + state) survives a
-# restart, so a continued conversation keeps its context (Chunk 8).
+# restart, so a continued conversation keeps its context.
 os.makedirs(_DATA_DIR, exist_ok=True)
 _session_service = SqliteSessionService(os.path.join(_DATA_DIR, "sessions.db"))
 _runner = Runner(app_name=APP_NAME, agent=root_agent, session_service=_session_service)

@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/josephhdu/FinanceAgent/actions/workflows/ci.yml/badge.svg)](https://github.com/josephhdu/FinanceAgent/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-![Python](https://img.shields.io/badge/python-3.11%2B-blue)
+![Python](https://img.shields.io/badge/python-3.10%2B-blue)
 
 A web trading-desk UI backed by a **deterministic multi-agent system** built on
 Google's Agent Development Kit (ADK) and Gemini. Ask natural-language questions and
@@ -34,7 +34,7 @@ Everything else — charts, RAG, trading — hangs off that deterministic spine.
 | **Charts** | `visualization_agent` → matplotlib PNGs, delivered out-of-band to the browser |
 | **10-K Q&A with citations** | `tenk_agent` → ChromaDB semantic search over SEC filings (RAG) |
 | **Trade signals + approval** | `trading_agent` → weighted BUY/SELL/HOLD score, two-turn human approval |
-| **Dashboard UI** | Watchlist, interactive SVG charts with forecast overlay, portfolio P/L, GUI trade ticket, AI copilot with chat history |
+| **Dashboard UI** | Watchlist, interactive TradingView charts with forecast overlay, portfolio P/L, GUI trade ticket, AI copilot with chat history |
 
 All of it sits behind a login (JWT + bcrypt), structured audit logging, input
 guardrails (injection blocking, PII masking, token ceiling, enforced disclaimer), and
@@ -106,13 +106,12 @@ The full write-ups (cost tiering, per-user scoping, human-in-the-loop) live in t
 │   ├── stock_agent/      orchestrator, agents, tools, guardrails, auth, RAG
 │   ├── tests/            pytest unit suite
 │   └── eval/             regression-gated eval harness
-├── arch/         ← architecture blueprint (orchestration, MCP, RAG, guardrails, …)
-└── prd/          ← product requirements + epic/story breakdown
+└── design/       ← original design blueprint (architecture + PRD), larger than what's built
 ```
 
-This repo deliberately keeps the **design docs alongside the code**. `arch/` and `prd/`
-are the blueprint the implementation was built from; the app implements a
-scoped-down v1 of that plan, with the larger surface documented as a roadmap.
+[`design/`](design/) holds the blueprint the implementation was planned from. It
+describes a **larger system than what's built** — the app is a scoped-down v1, and
+the unbuilt parts are listed in the roadmap below.
 
 ---
 

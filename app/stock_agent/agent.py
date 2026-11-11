@@ -2,9 +2,7 @@
 
 Runs the intent_agent, parses its JSON, then executes an ordered pipeline of
 specialist agents chosen by a pure-Python dict lookup (_ROUTE_MAP). No LLM
-decides which agent runs next — that is the whole point (arch/01-orchestration).
-
-Chunk 1 routes only PRICE. Later chunks register more specialists and intents.
+decides which agent runs next — that is the whole point.
 """
 from __future__ import annotations
 

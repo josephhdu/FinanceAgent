@@ -2,7 +2,7 @@
 
 A single source of truth for the Gemini model string and per-agent output
 token budgets. Kept deliberately static (not resolved dynamically) so behavior
-is reproducible — see arch/Architecture.md 5.14.
+is reproducible — see design/architecture/Architecture.md 5.14.
 """
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ import os
 # NOTE: the blueprint targeted "gemini-2.5-flash", which is now 404-gated for
 # new API keys ("no longer available to new users"), along with 2.5-flash-lite.
 # gemini-3.6-flash is its direct successor. Centralizing the strings here is
-# exactly why swapping models is a trivial change (arch/Architecture.md 5.14).
+# exactly why swapping models is a trivial change (design/architecture/Architecture.md 5.14).
 MODEL_FULL = "gemini-3.6-flash"
 MODEL_LITE = "gemini-3.5-flash-lite"
 MODEL_VERSION = MODEL_FULL  # default / back-compat alias
@@ -49,7 +49,7 @@ AGENT_TOKEN_LIMITS: dict[str, int] = {
 }
 DEFAULT_OUTPUT_TOKENS = 1024
 
-# Guardrail input ceiling (Chunk 6). Authoritative value per arch/05-guardrails.md.
+# Guardrail input-token ceiling (see design/architecture/05-guardrails.md).
 TOKEN_LIMIT = int(os.getenv("TOKEN_LIMIT", "120000"))
 
 

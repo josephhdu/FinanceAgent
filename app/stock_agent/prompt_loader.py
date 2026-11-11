@@ -2,7 +2,7 @@
 
 Keeping prompts in files (not inline strings) is the "prompt skill registry"
 practice — prompts are versioned artifacts you can diff and eval independently
-(arch/Architecture.md 5.13/5.14).
+(design/architecture/Architecture.md 5.13/5.14).
 """
 from __future__ import annotations
 

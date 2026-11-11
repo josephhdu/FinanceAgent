@@ -3,10 +3,10 @@
 Every significant event (agent start/stop, model call, tool call) is written as
 one JSON object per line to ``audit.log``. This is always-on, zero-dependency
 observability — useful in the terminal during development and the substrate the
-eval harness reads later (Chunk 7).
+eval harness reads.
 
-In Chunk 0 the ADK lifecycle callbacks are thin loggers. Chunk 3 adds the
-critical ``after_tool_callback`` behavior: stripping large base64 chart payloads
+The ADK lifecycle callbacks are mostly thin loggers. The critical one is
+``after_tool_callback``: stripping large base64 chart payloads
 out of tool responses before they reach the LLM's context window.
 """
 from __future__ import annotations
@@ -49,7 +49,7 @@ current_user_id: ContextVar[str | None] = ContextVar("current_user_id", default=
 
 # Set True by the orchestrator when a turn runs a disclaimer-required agent (e.g.
 # trading). The web server reads it after streaming and appends the financial-
-# advice disclaimer if the model didn't already include one (Chunk 6 guardrail).
+# advice disclaimer if the model didn't already include one.
 current_disclaimer_required: ContextVar[bool] = ContextVar(
     "current_disclaimer_required", default=False
 )
@@ -145,7 +145,7 @@ def reset_metrics() -> None:
 
 
 # --- tool responses that carry large base64 image payloads ----------------
-# Chunk 3 wires these up. Declared here so the strip logic has one home.
+# Declared here so the strip logic has one home.
 _CHART_RENDER_TOOLS = frozenset(
     {
         "render_price_chart_for_ticker",
@@ -155,11 +155,11 @@ _CHART_RENDER_TOOLS = frozenset(
     }
 )
 
-# Agents whose output must always carry a financial-risk disclaimer (Chunk 5/6).
+# Agents whose output must always carry a financial-risk disclaimer.
 _DISCLAIMER_REQUIRED_AGENTS = frozenset({"trading_agent"})
 
 
-# --- ADK lifecycle callbacks (thin in Chunk 0, extended later) ------------
+# --- ADK lifecycle callbacks ----------------------------------------------
 
 def before_agent_callback(callback_context: Any = None, **_: Any):
     name = getattr(callback_context, "agent_name", None)

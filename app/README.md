@@ -20,7 +20,7 @@ ticket) with an AI copilot alongside it.
 | **Charts** | `visualization_agent` → matplotlib PNGs, delivered out-of-band to the browser |
 | **10-K Q&A with citations** | `tenk_agent` → ChromaDB semantic search over SEC filings (RAG) |
 | **Trade signals + approval** | `trading_agent` → weighted BUY/SELL/HOLD score, two-turn human approval |
-| **Dashboard UI** | Watchlist + live quotes, interactive SVG charts with forecast overlay, portfolio P/L, GUI trade ticket, AI copilot with chat history |
+| **Dashboard UI** | Watchlist + live quotes, interactive TradingView charts with forecast overlay, portfolio P/L, GUI trade ticket, AI copilot with chat history |
 
 All of it sits behind a login (JWT + bcrypt), structured audit logging, input
 guardrails, and a regression-gated eval harness.
@@ -110,7 +110,7 @@ These are the parts worth reading the code for.
 
 ## Tech stack
 
-**Backend** — Python 3.11+ · **Google ADK** + **google-genai** (Gemini) · **FastMCP**
+**Backend** — Python 3.10+ · **Google ADK** + **google-genai** (Gemini) · **FastMCP**
 (finance tools over MCP/stdio) · **FastAPI** + **uvicorn** (SSE streaming) · **ChromaDB**
 + **sentence-transformers** (`all-MiniLM-L6-v2`) for RAG · **yfinance** / pandas /
 matplotlib · **PyJWT** + **bcrypt** (auth) · **aiosqlite** (persistent sessions).

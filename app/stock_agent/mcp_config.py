@@ -1,7 +1,7 @@
 """Factory for the finance MCP toolset.
 
 Each agent requests only the tools it needs via ``tool_filter`` — least-privilege
-tool access (arch/Architecture.md 5.11). The MCP server runs as a stdio
+tool access (design/architecture/Architecture.md 5.11). The MCP server runs as a stdio
 subprocess launched with the same Python interpreter as the web server.
 """
 from __future__ import annotations

@@ -1,4 +1,4 @@
-"""Chunk 6 — safety guardrails.
+"""Safety guardrails.
 
 Two tiers, wired where each check actually belongs in this architecture:
 

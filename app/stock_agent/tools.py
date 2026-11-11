@@ -1,8 +1,8 @@
 """Direct-Python tools shared by the specialist agents.
 
-- resolve_ticker: name/alias -> canonical ticker (Chunk 1)
-- compute_linear_regression_forecast + fetch_and_forecast: OLS forecast (Chunk 3)
-- render_*_chart_for_ticker: one-shot chart tools (Chunk 3)
+- resolve_ticker: name/alias -> canonical ticker
+- compute_linear_regression_forecast + fetch_and_forecast: OLS forecast
+- render_*_chart_for_ticker: one-shot chart tools
 
 The chart tools follow the ONE-SHOT pattern: each fetches its own data, computes,
 and renders a PNG entirely inside the function, returning a compact dict whose
@@ -23,7 +23,7 @@ matplotlib.use("Agg")  # headless backend — no display needed
 import matplotlib.pyplot as plt  # noqa: E402
 import yfinance as yf  # noqa: E402
 
-# --- ticker resolution (Chunk 1) ------------------------------------------
+# --- ticker resolution ----------------------------------------------------
 
 _TICKER_TABLE: dict[str, str] = {
     "microsoft": "MSFT", "msft": "MSFT",
@@ -79,7 +79,7 @@ def resolve_ticker(ticker_or_name: str) -> dict:
     return {"ticker": ticker, "original_input": raw}
 
 
-# --- OLS forecast (Chunk 3) -----------------------------------------------
+# --- OLS forecast ---------------------------------------------------------
 
 def compute_linear_regression_forecast(prices: list[float], horizon: int = 14) -> dict:
     """Fit an ordinary-least-squares trend line to a price series and project it.
@@ -179,7 +179,7 @@ def fetch_and_forecast(ticker: str) -> dict:
     }
 
 
-# --- one-shot chart renderers (Chunk 3) -----------------------------------
+# --- one-shot chart renderers ---------------------------------------------
 
 _BG = "#0f131a"
 _FG = "#e9e7e1"
