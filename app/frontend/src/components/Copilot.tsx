@@ -123,10 +123,13 @@ export function Copilot({ sel, signal, onTurnComplete }: Props) {
   const askAI = useCallback(
     async (text: string) => {
       setBusy(true);
-      const aiId = Date.now() + 1;
+      // One clock read for both ids: two Date.now() calls can straddle a
+      // millisecond and collide, which streams the reply into the user bubble.
+      const userId = Date.now();
+      const aiId = userId + 1;
       setMessages((ms) => [
         ...ms,
-        { id: Date.now(), role: "user", text, images: [], sources: [], signal: null, progress: "", done: true, feedback: null },
+        { id: userId, role: "user", text, images: [], sources: [], signal: null, progress: "", done: true, feedback: null },
         { id: aiId, role: "ai", text: "", images: [], sources: [], signal: null, progress: "", done: false, feedback: null },
       ]);
       const patch = (fn: (m: Msg) => Msg) =>
