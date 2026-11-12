@@ -13,6 +13,7 @@ import json
 import math
 import os
 import random
+import threading
 from datetime import datetime, timezone
 
 import yfinance as yf
@@ -23,6 +24,12 @@ from .tools import fetch_and_forecast
 _DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data")
 _TRADES_PATH = os.path.join(_DATA_DIR, "trades.jsonl")
 _NOTIONAL_USD = 2000.0
+# Paper account starting cash — every user's balance is measured against this.
+STARTING_CASH = 10_000.0
+
+# Serializes check-then-append on the trade log so two concurrent orders can't
+# both pass the cash/holdings check (single-process server).
+_trade_lock = threading.Lock()
 
 # recommendationKey (yfinance) -> analyst sub-score in [-1, 1].
 _ANALYST_MAP = {
@@ -138,6 +145,38 @@ def _shares_held(ticker: str) -> int:
     return held
 
 
+def cash_balance(trades: list[dict] | None = None) -> float:
+    """Starting cash, net of every buy/sell notional in this user's trade log."""
+    cash = STARTING_CASH
+    for t in _read_trades() if trades is None else trades:
+        cash += -t["notional"] if t["action"] == "BUY" else t["notional"]
+    return cash
+
+
+def _record_trade(ticker: str, action: str, shares: int, price: float) -> dict:
+    """Validate a trade against cash and holdings, then append it — atomically.
+
+    The single write path for both the chat approval and the GUI ticket: a BUY
+    can't exceed available cash and a SELL can't exceed shares held.
+    """
+    tk = ticker.upper()
+    with _trade_lock:
+        if action == "BUY":
+            cost = shares * price
+            cash = cash_balance()
+            if cost > cash:
+                return {
+                    "status": "error",
+                    "message": f"not enough cash: {shares} {tk} costs ${cost:,.2f} "
+                    f"but you have ${cash:,.2f}",
+                }
+        else:
+            held = _shares_held(tk)
+            if shares > held:
+                return {"status": "error", "message": f"can't sell {shares} {tk} — you only hold {held}"}
+        return {"status": "success", **_append_trade(tk, action, shares, price)}
+
+
 def _append_trade(ticker: str, action: str, shares: int, price: float) -> dict:
     """Write one executed (mock) paper-trade record to the append-only log,
     stamped with the current user, and return it."""
@@ -158,19 +197,15 @@ def _append_trade(ticker: str, action: str, shares: int, price: float) -> dict:
 
 
 def execute_pending_trade() -> dict:
-    """Record the pending trade (chat/agent path) as an executed paper trade."""
+    """Record the pending trade (chat path) as an executed paper trade.
+
+    Called only by the orchestrator after the user's message parses as an
+    approval — deliberately NOT exposed as a tool to any LLM agent.
+    """
     p = _pending.pop(_pkey(), None)
     if p is None:
         return {"status": "error", "message": "no pending trade to execute"}
-    if p["action"] == "SELL":
-        held = _shares_held(p["ticker"])
-        if p["shares"] > held:
-            return {
-                "status": "error",
-                "message": f"can't sell {p['shares']} {p['ticker']} — you only hold {held}",
-            }
-    record = _append_trade(p["ticker"], p["action"], p["shares"], p["price"])
-    return {"status": "success", **record}
+    return _record_trade(p["ticker"], p["action"], p["shares"], p["price"])
 
 
 def execute_trade_now(ticker: str, action: str, shares: int, price: float | None = None) -> dict:
@@ -189,21 +224,12 @@ def execute_trade_now(ticker: str, action: str, shares: int, price: float | None
     if shares <= 0:
         return {"status": "error", "message": "shares must be a positive whole number"}
 
-    if action == "SELL":
-        held = _shares_held(ticker)
-        if shares > held:
-            return {
-                "status": "error",
-                "message": f"can't sell {shares} {ticker.upper()} — you only hold {held}",
-            }
-
     if price is None:
         fc = fetch_and_forecast(ticker)
         price = fc.get("current_price") if fc.get("status") == "success" else None
         if price is None:
             return {"status": "error", "message": f"could not price {ticker.upper()}"}
-    record = _append_trade(ticker, action, shares, price)
-    return {"status": "success", **record}
+    return _record_trade(ticker, action, shares, price)
 
 
 def _read_trades() -> list[dict]:

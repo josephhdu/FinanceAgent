@@ -1,9 +1,9 @@
-"""Trading agent — mock BUY/SELL/HOLD with two-turn human approval.
+"""Trading agent — mock BUY/SELL/HOLD recommendations with human approval.
 
-Turn 1: compute a signal, store a pending trade, present a recommendation card.
-Turn 2: the orchestrator detects the pending trade and routes the user's yes/no
-straight here (bypassing intent classification), and this agent executes or
-cancels accordingly. All trades are paper trades appended to trades.jsonl.
+This agent only PROPOSES: it computes a signal, stores a pending trade, and
+presents a recommendation card. It has no tool that can execute a trade. The
+user's yes/no is parsed by the orchestrator in plain Python, which executes or
+cancels the pending trade itself. All trades are paper trades in trades.jsonl.
 """
 from __future__ import annotations
 
@@ -15,9 +15,6 @@ from .model_config import model_for_agent, output_token_limit
 from .prompt_loader import load_prompt
 from .tools import resolve_ticker
 from .trade_tools import (
-    cancel_pending_trade,
-    execute_pending_trade,
-    get_pending_trade,
     get_portfolio,
     get_trade_history,
     get_trade_signals,
@@ -33,9 +30,6 @@ trading_agent = LlmAgent(
         resolve_ticker,
         get_trade_signals,
         store_pending_trade,
-        get_pending_trade,
-        execute_pending_trade,
-        cancel_pending_trade,
         get_portfolio,
         get_trade_history,
     ],

@@ -191,7 +191,7 @@ with `/api` proxied to a backend on :8000. More setup notes are in the
 
 ```bash
 cd app
-pytest                          # 21 unit tests: routing, guardrails, portfolio accounting (no model calls)
+pytest                          # 25 unit tests: routing, trade approval, guardrails, portfolio accounting (no model calls)
 python main.py --check          # build the agent graph and print the routing table
 python eval/run_eval.py --gate  # score intent accuracy with real model calls; non-zero exit below threshold
 ```

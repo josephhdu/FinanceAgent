@@ -88,6 +88,25 @@ def test_sell_within_holdings_is_allowed(monkeypatch):
     assert res["status"] == "success"
 
 
+def test_cash_balance_nets_buys_and_sells():
+    trades = [_trade("AAPL", "BUY", 10, 100.0), _trade("AAPL", "SELL", 4, 150.0)]
+    assert tt.cash_balance(trades) == tt.STARTING_CASH - 1000.0 + 600.0
+
+
+def test_buy_beyond_cash_is_blocked(monkeypatch):
+    monkeypatch.setattr(tt, "_read_trades", lambda: [_trade("AAPL", "BUY", 90, 100.0)])
+    # $9,000 spent, $1,000 left: a $1,500 buy must be rejected.
+    res = tt.execute_trade_now("MSFT", "BUY", 3, price=500.0)
+    assert res["status"] == "error"
+    assert "not enough cash" in res["message"]
+
+
+def test_buy_within_cash_is_allowed(monkeypatch):
+    monkeypatch.setattr(tt, "_read_trades", lambda: [])
+    monkeypatch.setattr(tt, "_append_trade", lambda *a, **k: {"trade_id": "TRD-TEST"})
+    assert tt.execute_trade_now("MSFT", "BUY", 2, price=500.0)["status"] == "success"
+
+
 def test_rejects_bad_action_and_nonpositive_shares():
     assert tt.execute_trade_now("AAPL", "HOLD", 1, price=1.0)["status"] == "error"
     assert tt.execute_trade_now("AAPL", "BUY", 0, price=1.0)["status"] == "error"

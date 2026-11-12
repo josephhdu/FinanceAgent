@@ -214,7 +214,7 @@ and the oversell guard. It runs on every push via GitHub Actions.
 ```bash
 cd app
 pip install pytest
-pytest                 # ~2s, 21 tests
+pytest                 # ~2s, 25 tests
 python main.py --check # build the agent graph + print the routing table (smoke test)
 ```
 

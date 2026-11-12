@@ -20,7 +20,7 @@ from .intent_agent import classify_intent
 from .prediction_agent import prediction_agent as _prediction_agent
 from .price_agent import price_agent as _price_agent
 from .tenk_agent import tenk_agent as _tenk_agent
-from .trade_tools import cancel_pending_trade, has_pending_trade
+from .trade_tools import cancel_pending_trade, execute_pending_trade, has_pending_trade
 from .trading_agent import trading_agent as _trading_agent
 from .visualization_agent import visualization_agent as _visualization_agent
 
@@ -35,21 +35,40 @@ _ROUTE_MAP: dict[str, list[str]] = {
     "TRADE_ANALYSIS": ["trading_agent"],
 }
 
-# Short approve/cancel phrases that, when a trade is pending, route straight to
-# the trading agent without re-classifying (so a bare "yes" always lands right).
-_DECISION_WORDS = {
-    "yes", "y", "yeah", "yep", "yup", "confirm", "confirmed", "ok", "okay",
-    "sure", "buy", "sell", "execute", "proceed", "approve", "approved",
-    "no", "n", "nope", "cancel", "stop", "abort", "decline", "reject",
+# Approving a pending trade is decided here in Python, never by a model. A reply
+# counts as a decision only if EVERY word is an approve/decline word or harmless
+# filler — so "yes" or "no thanks" qualify, but "should I buy NVDA?" or
+# "ok what is MSFT at" don't. Anything ambiguous cancels the proposal (fail safe).
+_APPROVE_WORDS = {
+    "yes", "y", "yeah", "yep", "yup", "sure", "ok", "okay", "confirm", "confirmed",
+    "approve", "approved", "execute", "proceed",
 }
+_DECLINE_WORDS = {"no", "n", "nope", "nah", "cancel", "stop", "abort", "decline", "reject", "don't", "dont"}
+_FILLER_WORDS = {"please", "thanks", "thank", "you", "it", "do", "go", "ahead", "for", "the", "trade", "that"}
+_APPROVE_PHRASES = {"do it", "go ahead", "go for it"}
 
 
-def _looks_like_decision(text: str) -> bool:
-    t = (text or "").strip().lower().rstrip(".!")
-    if len(t) > 30:
-        return False
-    words = set(re.findall(r"[a-z']+", t))
-    return bool(words & _DECISION_WORDS) or t in {"do it", "go ahead"}
+def _parse_decision(text: str) -> str | None:
+    """Return "approve", "decline", or None if the message isn't a clear yes/no."""
+    words = re.findall(r"[a-z']+", (text or "").lower())
+    if not words or len(words) > 6:
+        return None
+    if set(words) - _APPROVE_WORDS - _DECLINE_WORDS - _FILLER_WORDS:
+        return None
+    approve = bool(set(words) & _APPROVE_WORDS) or " ".join(words) in _APPROVE_PHRASES
+    decline = bool(set(words) & _DECLINE_WORDS)
+    if approve == decline:
+        return None
+    return "approve" if approve else "decline"
+
+
+def _trade_result_text(res: dict) -> str:
+    if res.get("status") != "success":
+        return f"Couldn't record that trade: {res.get('message', 'unknown error')}."
+    return (
+        f"✅ Recorded paper trade **{res['trade_id']}**: {res['action']} {res['shares']} "
+        f"{res['ticker']} at ${res['price']:,.2f} (≈ ${res['notional']:,.2f})."
+    )
 
 
 def _event_text(event: Event) -> str:
@@ -118,16 +137,22 @@ class GraphOrchestrator(BaseAgent):
             )
             return
 
-        # 0) Pending-trade bypass — runs BEFORE classification. If a trade is
-        #    awaiting approval, a short yes/no routes straight to the trading
-        #    agent so a bare "yes" can't be misrouted. Any other message cancels
-        #    the stale proposal and falls through to normal handling.
+        # 0) Pending-trade decision — runs BEFORE classification. The human
+        #    approval step is enforced in code: only an unambiguous yes executes
+        #    the trade, and no model is involved. Any other message cancels the
+        #    stale proposal and falls through to normal handling.
         if has_pending_trade():
-            if _looks_like_decision(user_text):
+            decision = _parse_decision(user_text)
+            if decision:
                 audit.current_disclaimer_required.set(True)
-                yield self._progress(ctx, "Processing your trade decision…")
-                async for event in self.specialists["trading_agent"].run_async(ctx):
-                    yield event
+                if decision == "approve":
+                    res = await asyncio.to_thread(execute_pending_trade)
+                    audit.log_event("trade_decision", decision=decision, status=res.get("status"))
+                    yield self._msg(ctx, _trade_result_text(res))
+                else:
+                    cancel_pending_trade()
+                    audit.log_event("trade_decision", decision=decision)
+                    yield self._msg(ctx, "Cancelled — no trade was recorded.")
                 return
             cancel_pending_trade()
             yield self._progress(ctx, "Previous trade proposal cancelled — handling your new request…")

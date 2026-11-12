@@ -33,17 +33,15 @@ from stock_agent import audit, auth, guardrails, market_data, session_store  # n
 from stock_agent import tenk_tools  # noqa: E402
 from stock_agent.agent import root_agent  # noqa: E402
 from stock_agent.trade_tools import (  # noqa: E402
+    cash_balance,
     execute_trade_now,
     get_portfolio,
     get_trade_history,
     get_trade_signals,
-    _read_trades,
 )
 
 # Watchlist shown by default (the dashboard lets you scope quotes to any set).
 DEFAULT_WATCHLIST = ["AMD", "MSFT", "NVDA", "SNOW", "AAPL", "META"]
-# Paper account starting cash — every user's portfolio is measured against this.
-STARTING_CASH = 10_000.0
 
 _HERE = os.path.dirname(__file__)
 _FRONTEND_DIST = os.path.join(_HERE, "frontend", "dist")
@@ -310,10 +308,7 @@ def _compute_portfolio() -> dict:
             "pl_pct": round(pl / basis * 100, 2) if basis else 0.0,
         })
 
-    # Cash = starting cash, net of every buy/sell notional this user made.
-    cash = STARTING_CASH
-    for t in _read_trades():
-        cash += (-t["notional"] if t["action"] == "BUY" else t["notional"])
+    cash = cash_balance()
 
     total_pl = mkt_value - invested
     return {
